@@ -1,0 +1,547 @@
+<html>
+<head>
+<style>
+#msg3 {
+	margin:330px 500px;
+	position:absolute;
+	display:none;
+	width:30%;
+	height:0px;
+	color:red;
+	font-size:15pt;
+}
+
+#successImg3 {
+	margin:330px 500px;
+	position:absolute;
+	height:0px;
+	color:red;
+	font-size:15pt;
+	display:none;
+}
+
+body {
+	border-style: ridge;
+	border-radius: 5px;
+	background-image: url("bg.jpg");
+	width:100%;
+	height:110%;
+}
+
+#button3 {
+    width: 100%;
+    background-color: #4CAF50;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    position:relative;
+    
+}
+#button3:hover {
+    background-color: #45a049;
+}
+</style>
+<link rel="stylesheet" type="text/css" href="project.css" >
+<script type="text/javascript">
+
+var i=0;
+var count=0,counter=0,count2 = 0;
+var name1,name2,name3;
+var finalResult= new Array();
+var users=[];
+
+
+		//To check browser support for IndexedDb
+         window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+         window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
+         window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange
+         
+         if (!window.indexedDB) {
+            window.alert("Your browser doesn't support a stable version of IndexedDB.")
+         }
+         
+		 //Data initialisation for IndexedDB
+         const employeeData = [
+            { id: "0001", name: "gopal", course: "Java", instructor:"Prof.Thomas" },
+            { id: "0002", name: "prasad", course: "Python", instructor:"Prof.Adam" }
+         ];
+         var db;
+		 
+		 //Create a new database 
+         var request = window.indexedDB.open("newDatabase", 3);
+         
+		 //If error occured
+         request.onerror = function(event) {
+            console.log("error: ");
+         };
+         
+		 //On successful creation of database
+         request.onsuccess = function(event) {
+            db = request.result;
+            console.log("success: "+ db);
+         };
+         
+		 //When version of database is updated
+         request.onupgradeneeded = function(event) {
+            var db = event.target.result;
+            var objectStore = db.createObjectStore("students", {keyPath: "id"});
+            
+			//Adding the data to IndexedDB
+            for (var i in employeeData) {
+               objectStore.add(employeeData[i]);
+            }
+         };
+
+/* Creation of firt dropdown menu that will have two options
+*	for department names.
+*/
+window.onload = function() {
+
+	var mainDiv = document.getElementById('mainDiv');
+	var newDiv = document.createElement('div');
+	var label = document.createElement('label');
+	label.appendChild(document.createTextNode("Department"));
+	var sel = document.createElement('select');
+	newDiv.setAttribute('class','sub');
+	label.setAttribute('class','lb');
+	sel.setAttribute('class','control');
+	sel.onblur = doIt;
+
+
+	var option1 = document.createElement('option');
+	option1.appendChild(document.createTextNode("CSCI"));
+
+	var option2 = document.createElement('option');
+	option2.appendChild(document.createTextNode("IST"));
+
+	var option = document.createElement('option');
+	option.appendChild(document.createTextNode("---Select a Value----"));
+
+	sel.appendChild(option);
+	sel.appendChild(option1);
+	sel.appendChild(option2);
+
+	newDiv.appendChild(sel);
+	newDiv.insertBefore(label,sel);
+	mainDiv.appendChild(newDiv);
+}
+
+/* The data for select options is stored in a json array
+*/
+function jsonPrep(which) {
+
+var data = {
+		"choice" : [ {
+			"CSCI" : ["Java","Python","Course"]
+		}, {
+			"IST" : ["Data Warehouse","Mobile Development","Course"]
+		}, {
+			"Java" : ["Prof. Rossi","Prof.David","Instructor"]
+		},{
+			"Python" : ["Prof.Adam","Prof.Butler","Instructor"]
+		},{
+			"Data Warehouse" : ["Prof.Jai","Prof.Samuel","Instructor"]
+		},{
+			"Mobile Development" : ["Prof.Finch","Prof.Raj","Instructor"]
+		},{
+			"Prof. Rossi" : ["8 A.M","10 A.M","Timing"]
+		},{
+			"Prof.Adam" : ["11 A.M","12 A.M","Timing"]
+		},{
+			"Prof.Jai" : ["1 P.M","5 P.M","Timing"]
+		},{
+			"Prof.Finch" : ["2 P.M","3 P.M","Timing"]
+		},{
+			"Prof.David" : ["8 A.M","10 A.M","Timing"]
+		},{
+			"Prof.Butler" : ["11 A.M","12 A.M","Timing"]
+		},{
+			"Prof.Samuel" : ["1 P.M","5 P.M","Timing"]
+		},{
+			"Prof.Raj" : ["2 P.M","3 P.M","Timing"]
+		}]
+};
+	
+
+
+for ( var i = 0; i < data.choice.length; i++) {
+		var obj = data.choice[i];
+		var Name;
+		var Value;
+		for ( var key in obj) {
+			Name = key;
+			if(Name == which) {
+			name1 = obj[key][0];
+			name2 = obj[key][1];
+			name3 = obj[key][2];
+			}
+ 
+		}
+	}
+
+}
+
+/* This function is designed to dynamically generate
+*  all the select options menu except for  the first 
+*  select option which gets created on onload event ol
+*  window.
+*  Since we are using four dropdown menus in the project
+*  I have restricted the dynamic generation of select options
+*  to 4. By removing the if condition and adding the data in json
+*  array it could be used to generate n dropdown menus.  
+*/
+function doIt() {
+
+	var selEle = document.getElementsByClassName('control')[0];
+	var length = document.getElementsByClassName('control').length;
+	var selElement = document.getElementsByClassName('control')[length-1];
+	var which = selElement.value;
+
+	if(length < 4 && which!="---Select a Value----") {
+	
+		finalResult[length-1]=which;
+		selEle.onchange = function(){
+			if(selEle.parentNode.nextSibling != null || null!=selEle.parentNode) {
+			while(selEle.parentNode.nextSibling) {
+				selEle.parentNode.parentNode.removeChild(selEle.parentNode.nextSibling);
+				}
+	}
+}
+
+	jsonPrep(which);
+
+	var mainDiv = document.getElementById('mainDiv');
+	var newDiv = document.createElement('div');
+	var label = document.createElement('label');
+	
+	label.appendChild(document.createTextNode(name3));
+	var sel = document.createElement('select');
+	newDiv.setAttribute('class','sub');
+	
+	label.setAttribute('class','lb');
+	sel.setAttribute('class','control');
+	sel.onblur = doIt;
+	
+	sel.onchange = function(){
+
+	if(sel.parentNode.nextSibling != null || null!=sel.parentNode) {
+		while(sel.parentNode.nextSibling) {
+			sel.parentNode.parentNode.removeChild(sel.parentNode.nextSibling);
+		}
+	}
+
+	}
+	var option1 = document.createElement('option');
+	option1.appendChild(document.createTextNode(name1));
+
+	var option2 = document.createElement('option');
+	option2.appendChild(document.createTextNode(name2));
+
+	var option = document.createElement('option');
+	option.appendChild(document.createTextNode("---Select a Value----"));
+
+	sel.appendChild(option);
+	sel.appendChild(option1);
+	sel.appendChild(option2);
+
+	newDiv.appendChild(sel);
+	newDiv.insertBefore(label,sel);
+	mainDiv.appendChild(newDiv);
+
+}
+
+	else if(length ==4 && which!="---Select a Value----") {
+
+
+	var selElement = document.getElementsByClassName('control')[length-1];
+	var which = selElement.value;
+
+	finalResult[length-1]=which;
+	makeShoppingCart();
+	console.log(finalResult);
+
+	}
+
+}
+
+/* This function is designed to display the values chosen
+*  by the user.
+*/
+
+function makeShoppingCart() {
+	var result = document.getElementById("result");
+	var ul = document.createElement('ul');
+	var li1 = document.createElement('li');
+	
+	li1.setAttribute('class','newList');
+	li1.appendChild(document.createTextNode("Department: "+ finalResult[0]));
+	
+	var li2 = document.createElement('li');
+	li2.appendChild(document.createTextNode("Course: "+ finalResult[1]));
+	li2.setAttribute('class','newList');
+	
+	var li3 = document.createElement('li');
+	li3.appendChild(document.createTextNode("Professor: "+ finalResult[2]));
+	li3.setAttribute('class','newList');
+	
+	var li4 = document.createElement('li');
+	li4.appendChild(document.createTextNode("Timing: "+ finalResult[3]));
+	li4.setAttribute('class','newList');
+	
+	ul.appendChild(li1);
+	ul.appendChild(li2);
+	ul.appendChild(li3);
+	ul.appendChild(li4);
+	
+	result.appendChild(ul);
+
+
+}
+
+/* This function is designed to implement the sliding feature 
+*  for the shopping cart.
+*/
+function change() {
+	if(count == 0) {
+		var change1 = document.getElementById('myform');
+		change1.style.display="inline";
+		change2(change1);
+		count++;
+	}
+
+	var result = document.getElementById('result');
+	result.style.display="inline";
+
+	if (parseInt(result.style.right) < 180) {
+		result.style.right = parseInt(result.style.right) + 1 + 'px';
+		setTimeout(function () { change(); }, 10);
+	}
+	change6();
+}
+
+/* This function is designed to implement the sliding feature 
+*  for the form.
+*/
+
+function change2(which) {
+	var change1 = document.getElementById('myform');
+
+	if (parseInt(change1.style.height) < 330) {
+		change1.style.height = parseInt(change1.style.height) + 1 + 'px';
+		setTimeout(function () { change2(); }, 10);
+	}
+
+
+}
+
+/* This function is designed to implement the sliding feature 
+*  for the first name text box.
+*/
+
+function change3() {
+	var fname = document.getElementById('fname');
+	if (parseInt(fname.style.left) < 0) {
+			fname.style.left = parseInt(fname.style.left) + 1 + 'px';
+			setTimeout(function () { change3(); }, 500);
+				}
+}
+
+/* This function is designed to implement the sliding feature 
+*  for the last name text box.
+*/
+
+function change4() {
+	var lname = document.getElementById('lname');
+	if (parseInt(lname.style.left) < 0) {
+					lname.style.left = parseInt(lname.style.left) + 1 + 'px';
+					setTimeout(function () { change4(); }, 500);
+				}
+	change3();
+}
+
+/* This function is designed to implement the sliding feature 
+*  for the student Id text box.
+*/
+
+function change5() {
+	var sel = document.getElementById('studentId');
+	if (parseInt(sel.style.left) < 0) {
+					sel.style.left = parseInt(sel.style.left) + 1 + 'px';
+					setTimeout(function () { change5(); }, 700);
+				}
+	change4();
+}
+
+/* This function is designed to implement the sliding feature 
+*  for the submit button.
+*/
+function change7() {
+	var btn = document.getElementById('button2');
+	if (parseInt(btn.style.left) < 0) {
+				   btn.style.left = parseInt(btn.style.left) + 1 + 'px';
+					setTimeout(function () { change6(); }, 700);
+				}
+	change5();
+}
+
+/* This function is designed to implement the sliding feature 
+*  for the search course button.
+*/
+function change6() {
+	var btn = document.getElementById('button3');
+	if (parseInt(btn.style.left) < 0) {
+				   btn.style.left = parseInt(btn.style.left) + 1 + 'px';
+					setTimeout(function () { change6(); }, 700);
+				}
+	change7();
+}
+
+    var flag1=false,flag2=false,flag3=false;
+
+	
+/* This function is used to validate the user 
+* details in the form.  
+*/
+function validate() {
+	
+	var fname = document.getElementById('fname');
+	var lname = document.getElementById('lname');
+	var studentId = document.getElementById('studentId');
+	
+	var msg1 = document.getElementById('msg1');
+	var msg2 = document.getElementById('msg2');
+	var msg3 = document.getElementById('msg3');
+	
+	var img1 = document.getElementById('successImg1');
+	var img2 = document.getElementById('successImg2');
+	var img3 = document.getElementById('successImg3');
+	
+	if(fname.value == "" || fname.value == null) {
+		msg1.style.display="inline";
+	}
+		
+	else {
+		flag1 = true;
+		msg1.style.display="none";
+		img1.style.display="inline";
+	}
+	
+	if(lname.value == "" || lname.value == null) {
+		console.log('coming here');
+		msg2.style.display="inline";
+	}
+	else {
+		flag2 = true;
+		msg2.style.display="none";
+		img2.style.display="inline";
+	}
+	
+	
+	if(studentId.value == "" || studentId.value == null) {
+		msg3.style.display="inline";
+	}
+	else {
+		flag3 = true;
+		msg3.style.display="none";
+		img3.style.display="inline";
+	}
+	
+	if(flag1 && flag2 && flag3) {
+		updateDb(fname.value,lname.value);
+	}
+}
+
+/* This function is used for inserting the
+*  user details into our indexedDB.
+*/
+
+function updateDb(firstname,lastname) {
+	
+	var studentId = document.getElementById('studentId').value;
+	var btn = document.getElementById('button2');
+	
+	var request = db.transaction(["students"], "readwrite")
+				.objectStore("students")
+				.add({ id:studentId, givenname: firstname, surname:lastname,department:finalResult[0],
+				course:finalResult[1],instructor:finalResult[2],time:finalResult[3] });
+				
+				request.onsuccess = function(event) {
+				   alert("Information has been added to our database.");
+				};
+				
+				request.onerror = function(event) {
+				   alert("Unable to add data/data already exists in our database! ");
+				}
+	}
+
+/* This function is used to load the course search web page.
+*/
+
+function searchPage() {
+	window.location.href="search.html";
+}
+
+</script>
+</head>
+
+
+<body>
+	<h1>Course Registration</h1>
+	<span><button id="button1" onclick="change();">ADD</button></span>
+	
+	<div id="msg1"><p>First Name must be filled out</p></div>
+	<div id="msg2"><p>Last Name must be filled out</p></div>
+	<div id="msg3"><p>Student-Id must be filled out</p></div>
+	
+	<div id="successImg1"><img src="https://img.clipartfest.com/3e49842565d14bb6f6bcde9be6d0fa48_check-mark-symbol-clipart-tick-sign_7855-7040.png" width="100px" height="50px" position="absolute"></div>
+	<div id="successImg2"><img src="https://img.clipartfest.com/3e49842565d14bb6f6bcde9be6d0fa48_check-mark-symbol-clipart-tick-sign_7855-7040.png" width="100px" height="50px" position="absolute"></div>
+	<div id="successImg3"><img src="https://img.clipartfest.com/3e49842565d14bb6f6bcde9be6d0fa48_check-mark-symbol-clipart-tick-sign_7855-7040.png" width="100px" height="50px" position="absolute"></div>
+	
+	<div id="result" style="position:absolute;right:0px">Shopping Cart</div>
+	<div id="myform" style="position:absolute;height:0px">
+	  
+	  <form id="subform">
+		<label for="fname">First Name</label>
+		<input type="text" id="fname" name="firstname" placeholder="Your name.." style="left:-500px">
+		
+		<label for="lname">Last Name</label>
+		<input type="text" id="lname" name="lastname" placeholder="Your last name.." style="left:-700px"> 
+		
+		<label for="studentId">Student Id</label>
+		<input type="text" id="studentId" name="student id" placeholder="Your unique id.." style="left:-1000px">
+		
+		<button type='button' id="button2" onclick="validate();" style="left:-1200px">Submit</button>
+		<button type='button' id="button3" onclick="searchPage();" style="left:-1500px">Search Course</button>
+	  </form>
+	</div>
+
+	<footer>
+	<div class="footer1">Contact:
+	+1(585)733-9587
+	</div>
+	<div class="footer2">My Address
+	<br>392-13 Clayton Arms Apartment
+	<br>Clay Road
+	<br>Rochester,NY
+	</div>
+	<div class="footer3">Social links
+	<div class="picture">
+	<div class="picture1"><a href="https://www.facebook.com/gaurav.gaur.102"><img src="https://www.seeklogo.net/wp-content/uploads/2016/09/facebook-icon-preview-1.png" width="30px" height="30px"></a></div>
+	<div class="picture2"><a href="https://twitter.com/?lang=en"><img src="https://pbs.twimg.com/profile_images/531381005165158401/bUJYaSO9.png"width="30px" height="25px"></a></div>
+	<div class="picture3"><a href="https://accounts.google.com/ServiceLogin?service=mail&passive=true&rm=false&continue=https://mail.google.com/mail/&ss=1&scc=1&ltmpl=default&ltmplcache=2&emr=1&osid=1"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/New_Logo_Gmail.svg/2000px-New_Logo_Gmail.svg.png"width="30px" height="25px"></a></div>
+
+
+
+	</div>
+	</div>
+	<div class="last" align="center">Designed By:Gaurav Gaur</div>
+	</footer>
+	<div id = "mainDiv">
+	</div>
+
+
+</body>
+</html>

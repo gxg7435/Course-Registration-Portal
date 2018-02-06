@@ -1,0 +1,173 @@
+<html>
+<head>
+
+<style>
+	label {
+		margin:10px;
+	}
+	h1 {
+		position:absolute;
+		top:0px;
+		padding:10px 550px;
+		border-left: 6px solid red;
+		border-right: 6px solid red;
+		background-color: lightgrey;
+		border-style: inset;
+		border-radius: 5px;
+	
+	}
+	#mainDiv {
+		width:400px;
+		margin:130px 50px;
+		padding:20px;
+		border-style: ridge;
+		border-radius: 5px;
+	}
+	
+	button {
+	
+		width:100px;
+		height:25px;
+		margin:10px;
+	
+	}
+	
+	#result{
+		position:absolute;
+		top:300px;
+		border-style: ridge;
+		border-radius: 5px;
+		width:400px;
+		margin:20px 50px;;
+		padding:20px;
+		
+	}
+	
+	p {
+		padding:10px;
+		margin:10px;
+		border-style: ridge;
+		border-radius: 10px;
+	}
+</style>
+<script>
+		 
+		 var db;
+         //To open the database used previously.
+		 var request = window.indexedDB.open("newDatabase");
+         
+		 //If error occurs while opening the database
+         request.onerror = function(event) {
+            console.log("error: ");
+         };
+         
+		 //On successful operation
+         request.onsuccess = function(event) {
+            db = request.result;
+            console.log("success: "+ db);
+         };
+		 
+		 //Creating text-box , label and button for the page.
+		 window.onload=function () {
+			
+			var search = document.createElement('h1');
+			search.appendChild(document.createTextNode('Course Search'));
+			
+			var body = document.getElementsByTagName('body')[0];
+			body.appendChild(search);
+			
+			var mainDiv = document.getElementById('mainDiv');
+			var textBox = document.createElement('input');
+			
+			var label = document.createElement('label');
+			var button = document.createElement('button');
+			
+			button.setAttribute('onclick','read();');
+			button.appendChild(document.createTextNode('Search'));
+			
+			textBox.setAttribute('type','text');
+			textBox.setAttribute('id','studentId');
+			
+			label.setAttribute('for','studentId');
+			label.appendChild(document.createTextNode('Enter Student ID'));
+			
+			mainDiv.appendChild(label);
+			mainDiv.appendChild(textBox);
+			
+			mainDiv.appendChild(button);
+		 
+		 }
+		 
+		 /* This function is designed to display the retrieved value
+		 *  of the user from the database in the page.
+		 */
+		 function setContents(id,givenname,surname,course,department,instructor,time) {
+			
+			var div = document.createElement('div');
+			div.setAttribute('id','result');
+			
+			var ptag1 = document.createElement('p');
+			ptag1.appendChild(document.createTextNode("Student id: "+id));
+			
+			var ptag2 = document.createElement('p');
+			ptag2.appendChild(document.createTextNode("Name: "+givenname + " " + surname));
+			
+			var ptag4 = document.createElement('p');
+			ptag4.appendChild(document.createTextNode("Course: "+course));
+			
+			var ptag5 = document.createElement('p');
+			ptag5.appendChild(document.createTextNode("Department: "+department));
+			
+			var ptag6 = document.createElement('p');
+			ptag6.appendChild(document.createTextNode("Instructor: "+instructor));
+			
+			var ptag7 = document.createElement('p');
+			ptag7.appendChild(document.createTextNode("Time: " +time));
+			
+			div.appendChild(ptag1);div.appendChild(ptag2);
+			div.appendChild(ptag4);div.appendChild(ptag5);div.appendChild(ptag6);
+			div.appendChild(ptag7);
+			
+			var body = document.getElementsByTagName('body')[0];
+			body.appendChild(div);
+		 }
+		 
+		 /* Based on the student Id entered by the user,
+		 *  this function will fetch the value from the 
+		 *  database.
+		 */
+		 function read() {
+			
+			var id = document.getElementById('studentId');
+			var transaction = db.transaction(["students"],IDBTransaction.READ_ONLY);
+            
+			var objectStore = transaction.objectStore("students");
+            var request = objectStore.get(id.value);
+            
+            request.onerror = function(event) {
+               alert("Unable to retrieve data from database!");
+            };
+            
+            request.onsuccess = function(event) {
+               
+               if(request.result) {
+				  setContents(request.result.id,request.result.givenname,request.result.surname,request.result.course,request.result.department,
+				  request.result.instructor,request.result.time);
+               }
+               
+               else {
+                  alert("Data couldn't be found in our database!");
+               }
+            };
+			}
+</script>
+</head>
+
+<body>
+
+<div id='mainDiv'>
+</div>
+
+</body>
+
+</html>
